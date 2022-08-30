@@ -1,7 +1,8 @@
 # Bayesian Optimization with Informative Covariance
 
 This repository will provide code to reproduce the experiments in the paper https://arxiv.org/abs/2208.02704
-Additional results with trust regions can be found [here (Section 2)](techrep.pdf)
+Additional results with trust regions can be found
+[here (Section 2)](https://github.com/oznof/BOIC/blob/main/techrep.pdf)
 
 ## Informative Covariance
 
@@ -28,8 +29,8 @@ weights, kernels and distance functions. There is enough flexibility to specify 
 
 Interestingly, the problem shown in [Figure 1](https://arxiv.org/pdf/2208.02704.pdf#figure.caption.2) that is due to
 overconfident stationary surrogates can also be solved by modifying the acquisition step that uses
-Expected Improvement (EI). As described [here (Section 1)](techrep.pdf), the proposed Collapsed EI (CEI)
-is based on the repeated application of the Laplace method with mode collapse.
+Expected Improvement (EI). As described [here (Section 1)](https://github.com/oznof/BOIC/blob/main/techrep.pdf),
+the proposed Collapsed EI (CEI) is based on the repeated application of the Laplace method with mode collapse.
 The CEI algorithm leads to more informative acquisitions as it avoids locations with small predictive variances.
 Naturally, being a complementary approach, it can be used in combination with informative surrogates,
 and the information extracted during CEI can later be included in $\phi$.
