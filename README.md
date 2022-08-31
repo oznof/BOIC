@@ -1,8 +1,9 @@
 # Bayesian Optimization with Informative Covariance
 
 This repository will provide code to reproduce the experiments in the paper https://arxiv.org/abs/2208.02704
-Additional results with trust regions can be found
-[here (Section 2)](https://github.com/oznof/BOIC/blob/main/techrep.pdf)
+
+Additional results with trust regions (acquisitions) can be found
+[here (Section 2)](https://raw.githubusercontent.com/oznof/BOIC/main/techrep.pdf)
 
 ## Informative Covariance
 
@@ -25,12 +26,14 @@ Still, this particular form is flexible enough that it can represent an arbitrar
 weights, kernels and distance functions. There is enough flexibility to specify which choices should be learned
 (and how), or kept fixed.
 
-## Collapsed Expected Improvement
+## Collapsed Expected Improvement and Posterior over Promising Regions
 
 Interestingly, the problem shown in [Figure 1](https://arxiv.org/pdf/2208.02704.pdf#figure.caption.2) that is due to
 overconfident stationary surrogates can also be solved by modifying the acquisition step that uses
-Expected Improvement (EI). As described [here (Section 1)](https://github.com/oznof/BOIC/blob/main/techrep.pdf),
+Expected Improvement (EI).
+As described [here (Section 1)](https://raw.githubusercontent.com/oznof/BOIC/main/techrep.pdf),
 the proposed Collapsed EI (CEI) is based on the repeated application of the Laplace method with mode collapse.
 The CEI algorithm leads to more informative acquisitions as it avoids locations with small predictive variances.
-Naturally, being a complementary approach, it can be used in combination with informative surrogates,
-and the information extracted during CEI can later be included in $\phi$.
+Naturally, being a complementary approach, it can be used in combination with informative surrogates.
+In fact, as a byproduct, it computes an approximate posterior over promising regions. This information can later be
+used to adapt the shaping function $\phi$ that induces nonstationary effects.
