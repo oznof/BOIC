@@ -5,7 +5,7 @@ implementation can be found under ```boic.botorch.gpytorch.kernels.informative.I
 
 The Gaussian process ```boic.torch.gp.models.ExactGPModel``` is equipped with constant and quadratic mean functions as well as stationary (Matérn or RBF), cylindrical and informative covariance functions.
 The methods ```set_train_data``` and ```update_tr_bounds``` handle greedy anchors and trust regions.
-The model is trained with ```botorch.optim.fit.fit_gpytorch_scipy``` and ```botorch.optim.fit.fit_gpytorch_scipy``` optimizes the acquisition function ```botorch.acquisition.analytic.Expected Improvement```.
+The model is trained with ```botorch.optim.fit.fit_gpytorch_scipy``` and ```botorch.optim.optimize.optimize_acqf``` optimizes the acquisition function ```botorch.acquisition.analytic.Expected Improvement```.
 
 Settings can be found under ```boic.torch.gp.botorch.settings.BoTorchSettings```. The default data path is ```~/storage/data/boic/```.
 See also the demo in ```experiments```.
