@@ -27,11 +27,13 @@ Including information directly in the surrogate GP model allows fine-tuning of t
 
 More generally, this methodology can accommodate other nonnegative shaping functions beyond the specific semiparametric form shown in Equation 11. Nevertheless, this particular form is versatile, being capable, in theory, of representing a desired shape by appropriate choice of anchors, weights, kernels and distance functions. This flexibility allows for specifying which choices should be learned (and how), or kept fixed.
 
-## Collapsed Expected Improvement and Posterior over Promising Points
+## Deflated Acquisition Functions and Posterior over Promising Points
 
-To address the issue depicted in Figure 1, caused by overly confident stationary surrogates, another possible solution is to modify the acquisition step that uses Expected Improvement (EI).
+To address the issue depicted in Figure 1, caused by overly confident stationary surrogates, another possible solution is to modify the acquisition step.
 
-The proposed [Collapsed EI (CEI)](https://aflme.github.io/mlprojects/#mode-collapsed-acquisition-functions) is based on the repeated application of the Laplace method with mode collapse.
-This effectively leads to more informative acquisitions as locations with small predictive variances are not queried.
+[Deflated acquisition functions](https://oznof.github.io/mlprojects/), first proposed as Collapsed Expected Improvement (CEI, [technical report, August 2022](https://doi.org/10.5281/zenodo.24233796)), repeatedly apply the Laplace method to remove the modes of the acquisition function where the predictive variance is already small.
+This leads to more informative acquisitions, as locations with small predictive variances are not queried.
+
+The implementation is in `boic.botorch.deflated` (experimental, not part of the paper's experiments). `DeflatedAcquisitionFunction` wraps any acquisition function, and its name adds the prefix Deflated, as in `DeflatedExpectedImprovement`. It works on a log-density chosen by the kind of function: the function itself for log acquisition functions (LogEI, LogPI), its logarithm for positive ones (EI, PI), and the energy-based form for those that can be negative (UCB, posterior mean). A mode is removed by subtraction, as in the 2022 report, or by multiplication, in the spirit of deflation operators. The removed modes form a Gaussian mixture, returned by `search_distribution()`. Tests: `tests/test_deflated.py`.
 
 This method may also be combined with informative priors. Since an approximate posterior over promising points is computed as a byproduct, this information may be used to update the shaping function that induces the nonstationary effects. In addition, the underlying idea offers a general strategy to estimate multimodal functions/distributions without the problems generally associated with 1-turn variational inference (mass-covering or mode-seeking).
