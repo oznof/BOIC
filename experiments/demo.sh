@@ -32,6 +32,15 @@ for ep in rosenb; do  # qbranin, styb
       # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Ksk,KMsaasbase -acq_mode "Fei,NM$n_acqs"
       # informative kernel with greedy anchor and the SAAS hyperprior on the lengthscales (I+XA+SAAS)
       # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kik,KMsaasgreedy -acq_mode "Fei,NM$n_acqs" -pool true -nsl s -nsr kii0.1
+      # belief-augmented acquisition functions (Appendix I): Gaussian-weighted EI with fixed (X0) or adaptive (XA) location
+      # stationary kernel with Gaussian-weighted EI, fixed location (S+GWEIX0)
+      # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Ksk -acq_mode "Fgwei,NM$n_acqs"
+      # stationary kernel with Gaussian-weighted EI, adaptive location (S+GWEIXA)
+      # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Ksk -acq_mode "Fgweixa,NM$n_acqs"
+      # informative kernel with greedy anchor and Gaussian kernel-weighted EI, fixed location (I+XA+GKEIX0)
+      # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kik,KMgreedy -acq_mode "Fgkeiv0,NM$n_acqs" -pool true -nsl s -nsr kii0.1
+      # informative kernel with greedy anchor and Gaussian kernel-weighted EI, adaptive location (I+XA+GKEIXA)
+      # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kik,KMgreedy -acq_mode "Fgkeixav0,NM$n_acqs" -pool true -nsl s -nsr kii0.1
     done
   done
 done

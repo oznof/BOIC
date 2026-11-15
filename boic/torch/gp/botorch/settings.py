@@ -30,7 +30,8 @@ class BoTorchSettings(GPTorchSettings):
     TRAIN_METHOD_CHOICES = ['lbfgsb']
     DEFAULT_TRAIN_METHOD_MODE = 'botorch'
     TRAIN_METHOD_MODE_CHOICES = ['botorch']
-    ACQ_FN_CHOICES = ['ei']
+    # gwei, gkei: Gaussian-weighted EI (Appendix I); xa: centered at the best point, v0: floor of 1e-12
+    ACQ_FN_CHOICES = ['ei', 'gwei', 'gweixa', 'gweiv0', 'gweixav0', 'gkei', 'gkeixa', 'gkeiv0', 'gkeixav0']
     ACQ_FN_CHOICES += ['trgreedy' + afn for afn in ACQ_FN_CHOICES]
     DEFAULT_ACQ_FN = 'ei'
     DEFAULT_ACQ_METHOD = 'lbfgsb'
