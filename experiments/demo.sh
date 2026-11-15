@@ -12,6 +12,8 @@ for ep in rosenb; do  # qbranin, styb
       python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Ksk -acq_mode "Ftrgreedyei,NM$n_acqs"
       # nonstationary cylindrical kernel with constant mean (C)
       python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kck -acq_mode "Fei,NM$n_acqs"
+      # evolutionary baseline, CMA-ES with population size 10, starting at the center (CMA-ES)
+      python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode Kcmaes -acq_mode "Fei,NM$n_acqs"
       # PROPOSED
       # informative kernel with fixed anchor and constant mean (I+X0)
       python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kik,KMfixed -acq_mode "Fei,NM$n_acqs" -pool true -nsl s -nsr kii0.1

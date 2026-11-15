@@ -41,7 +41,7 @@ class BoTorchSettings(GPTorchSettings):
     MODEL_MEAN_MODE_CHOICES = ['const', 'quad', 'quadu', 'quadhs', 'quadln',
                                                 'quadfu', 'quadfhs', 'quadfln']
     DEFAULT_MODEL_KERNEL = 'sk'
-    MODEL_KERNEL_CHOICES = ['sk', 'ck', 'ik']
+    MODEL_KERNEL_CHOICES = ['sk', 'ck', 'ik', 'cmaes']  # cmaes: the CMA-ES baseline, not a kernel
     DEFAULT_MODEL_KERNEL_MODE = 'base'
     MODEL_KERNEL_MODE_CHOICES = ['base', 'fixed', 'greedy']
 
@@ -99,6 +99,16 @@ class BoTorchSettings(GPTorchSettings):
         base_kernel_mode = self.model_base_kernel_mode
         kernel = self.model_kernel
         kernel_mode = self.model_kernel_mode
+        if kernel == 'cmaes':  # the CMA-ES baseline replaces the Gaussian process model
+            from ...cmaes import CMAES
+            self.raise_error_if(kernel_mode != 'base', error=NotImplementedError,
+                                msg=f'For kernel={kernel}, only kernel_mode=base is implemented.')
+            self['model']['options'] = {'bounds': self['eval']['bounds'],
+                                        'train_inputs': train_inputs,
+                                        'train_targets': train_targets,
+                                        'x0': self.prior_input}
+            self['model']['cls'] = CMAES
+            return {'cls': self.model_cls, 'options': self.model_options}
         fixed_model_noise = 1e-3
         # Initialize outputscale and noise as in hypersphere
         outputscale_init_value = 1. if train_targets is None else train_targets.std().item()

@@ -9,3 +9,5 @@ torch==1.9.0+cpu
 gpytorch==1.6
 botorch==0.6.0
 pulse @ git+https://github.com/oznof/pulse@master
+cma==3.2.2
+
