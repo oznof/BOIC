@@ -591,6 +591,20 @@ class ExactGPModel(SurrogateModel, BoTorchModel, gpytorch.models.ExactGP):
             acqf = acq_fn(self, best_f=best_target, maximize=False)
             # NOTE: setting acqf as an attribute leads to recursionerror in train
             self.acquisition['fn'] = acqf
+        elif _fn.startswith('gwei') or _fn.startswith('gkei'):
+            # Gaussian-weighted EI (Appendix I): gwei normalizes the Gaussian prior, gkei does not
+            from boic.botorch.gaussianweighted_ei import GaussianWeightedExpectedImprovement
+            normalization = _fn.startswith('gwei')
+            prob_floor = 1e-12 if _fn.endswith('v0') else 0
+            _fn = _fn.replace('gkei', 'gwei').replace('v0', '')
+            reference_input = self.curr_best_input if _fn == 'gweixa' else None
+            data = self.acquisition.get('data')
+            zeta = 10 if data is None else data.nmax / 10  # zeta = N / 10, for an evaluation budget N
+            t = (num_train if data is None else data.n) + 1
+            acqf = GaussianWeightedExpectedImprovement(self, best_f=best_target, reference_input=reference_input,
+                                                       beta_t=zeta / t, bounds=bounds, maximize=False,
+                                                       prob_floor=prob_floor, normalization=normalization)
+            self.acquisition['fn'] = acqf
         else:
             raise ValueError(f"For this botorch model, {fn} is an invalid acquisition function.")
         if fn.startswith('trgreedy'): # enable greedy trust region
