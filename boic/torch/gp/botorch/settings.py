@@ -10,7 +10,7 @@ from boic.torch.gp.settings import GPTorchSettings
 from boic.botorch import gpytorch
 from boic.torch.gp.models import ExactGPModel
 from boic.botorch.gpytorch import constraints, priors
-from boic.botorch.gpytorch.priors import HalfHorseshoePrior, KumaraswamyPrior, LogNormalPrior,\
+from boic.botorch.gpytorch.priors import HalfHorseshoePrior, KumaraswamyPrior, LogNormalPrior, SAASPrior, \
                                          LogSpikeUniformSlabPrior, SpikeUniformSlabPrior
 # todo: positive is causing error pickling, import it from patch file for now
 from boic.botorch.gpytorch.constraints import Positive
@@ -44,6 +44,8 @@ class BoTorchSettings(GPTorchSettings):
     MODEL_KERNEL_CHOICES = ['sk', 'ck', 'ik', 'cmaes']  # cmaes: the CMA-ES baseline, not a kernel
     DEFAULT_MODEL_KERNEL_MODE = 'base'
     MODEL_KERNEL_MODE_CHOICES = ['base', 'fixed', 'greedy']
+    # prefix saas: SAAS hyperprior on the lengthscales (Appendix H), e.g. saasbase (S+SAAS), saasgreedy (I+XA+SAAS)
+    MODEL_KERNEL_MODE_CHOICES += ['saas' + km for km in MODEL_KERNEL_MODE_CHOICES]
 
     def packages_initialize(self):
         super().packages_initialize()
@@ -109,6 +111,8 @@ class BoTorchSettings(GPTorchSettings):
                                         'x0': self.prior_input}
             self['model']['cls'] = CMAES
             return {'cls': self.model_cls, 'options': self.model_options}
+        is_saas = kernel_mode.startswith('saas')
+        kernel_mode = kernel_mode.replace('saas', '', 1)
         fixed_model_noise = 1e-3
         # Initialize outputscale and noise as in hypersphere
         outputscale_init_value = 1. if train_targets is None else train_targets.std().item()
@@ -117,7 +121,7 @@ class BoTorchSettings(GPTorchSettings):
         # noise (variance)
         nv_lb, nv_ub = math.exp(-12), math.exp(16),
         # lengthscales
-        ls_lb, ls_ub = math.exp(-12), 2 * max_radius
+        ls_lb, ls_ub = math.exp(-12), math.inf if is_saas else 2 * max_radius
         # outputscale (signal variance)
         sv_lb, sv_ub = math.exp(-12), math.exp(20)
         # Other bounds
@@ -126,7 +130,8 @@ class BoTorchSettings(GPTorchSettings):
 
         noise_prior = UniformPrior(nv_lb, nv_ub, validate_args=None)
         constant_mean_prior = UniformPrior(train_targets.min(), train_targets.max(), validate_args=False)
-        lengthscale_prior = UniformPrior(ls_lb, ls_ub, validate_args=False)
+        lengthscale_prior = SAASPrior(tau=0.1, validate_args=False) if is_saas else \
+                            UniformPrior(ls_lb, ls_ub, validate_args=False)
         outputscale_prior = UniformPrior(sv_lb, sv_ub, validate_args=False)
 
 

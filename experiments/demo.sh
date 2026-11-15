@@ -28,6 +28,10 @@ for ep in rosenb; do  # qbranin, styb
       # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kik,KMgreedy -acq_mode "Ftrgreedyei,NM$n_acqs" -pool true -nsl 0.1 -nsr 0.1
       # informative kernel with greedy anchor and quadratic mean with fixed center (I+XA+QM)
       # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMquadfhs,Kik,KMgreedy -acq_mode "Fei,NM$n_acqs" -pool true -nsl s -nsr kii0.1
+      # stationary kernel with the SAAS hyperprior on the lengthscales (S+SAAS)
+      # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Ksk,KMsaasbase -acq_mode "Fei,NM$n_acqs"
+      # informative kernel with greedy anchor and the SAAS hyperprior on the lengthscales (I+XA+SAAS)
+      # python bo.py -seed "$seed" -train_mode TMlog -prior_mode Xcenter -eval_mode E"$ep",D"$dim" -model_mode MMconst,Kik,KMsaasgreedy -acq_mode "Fei,NM$n_acqs" -pool true -nsl s -nsr kii0.1
     done
   done
 done
