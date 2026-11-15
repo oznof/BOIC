@@ -96,7 +96,7 @@ class GPTorchSettings(TorchSettings):
         flag = False
         self['model_mode'] = self.args['model_mode']
         if self['model']['kernel'] == 'ik' and (
-           any([self['model']['kernel_mode'].startswith(kmode)
+           any([self['model']['kernel_mode'].replace('saas', '', 1).startswith(kmode)
                 for kmode in ['fixed', 'greedy']])):
             flag = True
         return flag
@@ -104,7 +104,7 @@ class GPTorchSettings(TorchSettings):
     def get_commands_extra(self):
         # at this point, require_ecommands_extra has already been run
         if self['model']['kernel'] == 'ik' and (
-            any([self['model']['kernel_mode'].startswith(kmode)
+            any([self['model']['kernel_mode'].replace('saas', '', 1).startswith(kmode)
                 for kmode in ['fixed', 'greedy']])):
             # bool is not supported in argparse by default (unless using store_true)
             commands = {'pool': dict(type=self.str_to_bool, dest='model_pool', choices=[True, False],
@@ -156,7 +156,7 @@ class GPTorchSettings(TorchSettings):
     def default_name(self):
         name = super().default_name
         if self['model']['kernel'] == 'ik' and (
-           any([self['model']['kernel_mode'].startswith(kmode)
+           any([self['model']['kernel_mode'].replace('saas', '', 1).startswith(kmode)
                 for kmode in ['fixed', 'greedy']])):
             name, extras = name.split(' pool:')
             has_cls = 'cls' in self['model']

@@ -376,12 +376,45 @@ class ExactGPModel(SurrogateModel, BoTorchModel, gpytorch.models.ExactGP):
                         length = self.tr_options['length_init']
                     self.tr_options['length'] = length
 
+    # global shrinkage values of the SAAS hyperprior tried at each training (Appendix H)
+    SAAS_TAUS = (1, 0.1, 0.01, 0.001)
+
+    @property
+    def saas_priors(self):
+        """The SAAS hyperpriors on the lengthscales of the covariance function, if any."""
+        from boic.botorch.gpytorch.priors.saas_prior import SAASPrior
+        return [module.lengthscale_prior for module in self.covar_module.modules()
+                if isinstance(getattr(module, 'lengthscale_prior', None), SAASPrior)]
+
     def train(self, *args, **kwargs):
         if (not args and not kwargs) or (args and isinstance(args[0], bool)) or\
            ('mode' in kwargs and isinstance(kwargs['mode'], bool)):
             return BoTorchModel.train(self, *args, **kwargs)
+        elif self.saas_priors:
+            return self._train_saas(*args, **kwargs)
         else:
             return self._train(*args, **kwargs)
+
+    def _train_saas(self, *args, **kwargs):
+        """SAAS-MAP: train once for each shrinkage tau, from the same starting parameters,
+        and keep the model with the highest leave-one-out pseudo-likelihood."""
+        import gpytorch as _gpytorch
+        saas_priors = self.saas_priors
+        initial_params = self.params(to_numpy=True)
+        infos, loo, params = [], [], []
+        for tau in self.SAAS_TAUS:
+            self.params(**initial_params)
+            for prior in saas_priors:
+                prior.tau = torch.tensor(tau, dtype=prior.tau.dtype)
+            infos.append(self._train(*args, **kwargs))
+            loo_mll = _gpytorch.mlls.LeaveOneOutPseudoLikelihood(self.likelihood, self)
+            loo.append(loo_mll(self(*self.train_inputs), self.train_targets).item())
+            params.append(self.params(to_numpy=True))
+        best = int(np.argmax(loo))
+        self.params(**params[best])
+        for prior in saas_priors:
+            prior.tau = torch.tensor(self.SAAS_TAUS[best], dtype=prior.tau.dtype)
+        return infos[best]
 
     def _train(self, method='L-BFGS-B', options=None, track_iterations=False,
                only_keep_last_iteration=True, **kwargs):
